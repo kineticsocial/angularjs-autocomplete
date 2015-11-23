@@ -1,3 +1,4 @@
+/* global document */
 (function(){
   'use strict';
   var $timeout, $filter, AutoComplete;
@@ -114,7 +115,9 @@
         break;
       case 13: // ENTER
         selected && scope.select(selected);
-        evt.preventDefault();
+        if (!scope.subminOnEnter) {
+          evt.preventDefault();
+        }
         break;
       case 8: // BACKSPACE
         // remove the last element for multiple and empty input
@@ -152,9 +155,7 @@
         placeholderEl.style.lineHeight = controlBCR.height + 'px';
 
         if (scope.prefillFunc) {
-          scope.prefillFunc().then(function(html) {
-            placeholderEl.innerHTML = html;
-          });
+          scope.prefillFunc();
         }
 
         if (attrs.ngModel) {
@@ -304,7 +305,8 @@
           displayProperty: '@',
           placeholder: '@',
           prefillFunc: '&',
-          valueChanged: '&'
+          valueChanged: '&',
+          submitOnEnter: '='
         },
         link: linkFunc
       };
