@@ -279,7 +279,7 @@
         break;
       case 13: // ENTER
         selected && scope.select(selected);
-        if (!scope.subminOnEnter) {
+        if (!scope.submitOnEnter) {
           evt.preventDefault();
         }
         break;
