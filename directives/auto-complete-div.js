@@ -21,7 +21,10 @@
     var ulEl = scope.ulEl;
     var getLiEl = function(el) {
       var viewValue = typeof el == 'object' ? el[scope.displayProperty] : el;
-      var modelValue = typeof el == 'object' ? el[scope.valueProperty] : el;
+      var modelValue = el;
+      if (typeof el == 'object' || scope.controlEl.tagName == 'SELECT') {
+        modelValue = el[scope.valueProperty];
+      }
       var liEl = document.createElement('li');
       if (scope.listFormatter && typeof el == 'object') {
         liEl.innerHTML = scope.listFormatter(el);
