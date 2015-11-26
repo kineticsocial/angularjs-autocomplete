@@ -3,6 +3,7 @@
   <head>
     <title>test</title>
     <script src="lib/angular.js"></script>
+    <script src="lib/angular-sanitize.js"></script>
   <!--
   <script src="../build/angularjs-autocomplete.min.js"></script>
   -->
@@ -31,7 +32,7 @@
           return deferred.promise;
         };
         $scope.listFormatter = function(data) {
-          return '<b>('+data.id+')</b><i>'+data.value+'</i>'
+          return '<b>('+data.id+')</b> <i>'+data.value+'</i>'
         };
       });
       var printHTML = function(selector) {
