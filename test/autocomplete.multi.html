@@ -1,76 +1,78 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>test</title>
-    <script src="lib/angular.js"></script>
-    <script src="lib/angular-sanitize.js"></script>
-  <!--
-  <script src="../build/angularjs-autocomplete.min.js"></script>
-  -->
-    <script src="../directives/auto-complete.js"></script>
-    <script src="../directives/auto-complete-multi.js"></script>
-    <script src="../directives/auto-complete-div.js"></script>
-    <script src="../services/auto-complete.js"></script>
-    <script>
-      angular.module('myApp', ['angularjs-autocomplete', 'ngSanitize']).controller('MyCtrl', function($scope, $http) {
-        $scope.source1 = ["this", "is", "array", "of", "text"]; 
-        $scope.source2 = [{id:1, value:'One'}, {id:2, value:'Two'}, {id:3, value:'Three'}, {id:4, value:'Four'}];
-        $scope.callback = function(selected) {
-          $scope.foo_ids = $scope.foo.map(function(el) {return el.id || el;}).join(',');
-          $scope.selected = selected;
-        };
-        $scope.foo = ["is"];
-        $scope.foo_ids = '1,2';
-        $scope.source = $scope.source2;
-        $scope.disabled = false;
-        $scope.customListFormatter = function(data) {
-          return '<b>('+data.id+')</b><i>'+data.value+'</i>';
-        };
-        $scope.prefillFunc = function(url) {
-          $http.get(url).success(function(data) {
-            $scope.foo = data;
-          });
-        }
-      });
-      var printHTML = function(selector) {
-        document.write('<pre>'+
-          document.querySelector(selector).outerHTML.replace(/</g,'\n&lt;').replace(/[ ]([a-z])/g,"\n  $1") +
-        '</pre>')
-      };
-    </script>
-    <style>
-      select[auto-complete] {width: 500px; height: 60px;}
-    </style>
-  </head>
+<head>
+<title>test</title>
+<script src="lib/angular.js"></script>
+<script src="../app.js"></script>
+<script src="../services/auto-complete.js"></script>
+<script src="../directives/auto-complete-multi.js"></script>
+<script src="../directives/auto-complete-multi-div.js"></script>
+<link rel="stylesheet" href="../css/angularjs-autocomplete.css" />
+<script>
+angular.module('myApp', ['angularjs-autocomplete'])
+  .controller('MyCtrl', function($http) {
+    var vm = this;
+    vm.source1 = ["this", "is", "array", "of", "text"]; 
+    vm.source2 = [{id:1, value:'One'}, {id:2, value:'Two'}, {id:3, value:'Three'}, {id:4, value:'Four'}];
+    vm.source3 = "https://maps.googleapis.com/maps/api/geocode/json?address=:keyword";
+    vm.source4 = function(param) {
+      return $http.get("https://maps.googleapis.com/maps/api/geocode/json?address="+param.keyword);
+    };
+    vm.callback = function(data) {
+      vm.selected = data;
+    };
+    vm.listFormatter = function(data) {
+      return data.id ? 
+        '('+data.id+')'+data.value :
+        data.formatted_address || data;
+    };
+    vm.prefillFunc = function() {
+      vm.myVar = [{id:10, value: "One Hundred"}];
+    }
+  });
+</script>
+<style>
+  .my-input {width: 400px; height: auto; padding: 10px}
+</style>
+</head>
 
-  <body ng-app="myApp" ng-controller="MyCtrl">
-    <h1> Autocomplete - multiple </h1>
+<body ng-app="myApp" ng-controller="MyCtrl as vm">
+<h1> Autocomplete - multiple </h1>
 
-    Autocomplete source
-    <ul>
-      <li><input type="radio" ng-model="source" ng-value="source1"> {{source1}}
-      <li><input type="radio" ng-model="source" ng-value="source2"> {{source2}}
-    </ul>
-    <br/>
-    <br/>
-    <input type="button" ng-model="addRemove" ng-click="addRemove = !addRemove" value="Add/Remove" />
-    <div ng-if="addRemove">
-      <div auto-complete-multi 
-        placeholder="Select One"
-        xxxx-list-formatter="customListFormatter"
-        prefill-func="prefillFunc('prefill2.json?ids='+foo_ids)"
-        source="source" 
-        value-changed="callback(value)"> 
-        <select id='sp' ng-disabled="disabled" ng-model="foo"></select>
-        <input type="hidden" name="foo_ids" ng-model="foo_ids" ></select>
-      </div>
-      <input type="checkbox" ng-model="disabled"> Disable
-    </div>
-    <script>printHTML("div[auto-complete-multi]")</script>
-    <br/>$scope.foo:  <b>{{ foo }}</b>
-    <br/>$scope.foo_ids:  <b>{{ foo_ids }}</b>
-    <br/>$scope.source: {{ source }}
-    <br/>$scope.selected = {{ selected }}
-  </body>
+Choose Source:
+<br/><input type="radio" ng-model="vm.source" ng-value="vm.source1">{{vm.source1}}
+<br/><input type="radio" ng-model="vm.source" ng-value="vm.source2">{{vm.source2}}
+<br/><input type="radio" ng-model="vm.source" ng-value="vm.source3">{{vm.source3}}
+<br/><input type="radio" ng-model="vm.source" ng-value="vm.source4">{{''+vm.source4}}
 
+<br/><br/>
+<div ng-show="vm.source">
+  <div auto-complete-multi class="my-input one-two"
+    ng-show="vm.source == vm.source1 || vm.source == vm.source2"
+    source="vm.source"
+    ng-model="vm.myVar"
+    placeholder="{{disabled ? '':'Select One'}}"
+    list-formatter="vm.listFormatter"
+    prefill-func="vm.prefillFunc()"
+    ng-disabled="disabled"
+    value-changed="callback(value)">
+  </div>
+
+  <div auto-complete-multi class="my-input three-four"
+    ng-show="vm.source == vm.source3 || vm.source == vm.source4"
+    source="vm.source"
+    path-to-data="results"
+    display-property="formatted_address"
+    min-chars="2"
+    ng-model="vm.myVar"
+    ng-disabled="disabled"
+    placeholder="{{disabled ? '':'Enter Address'}}"
+    value-changed="callback(value)">
+  </div>
+  <input type="checkbox" ng-model="disabled"> Disable
+  <br/>vm.myVar:    {{ vm.myVar }}
+  <br/>vm.source:   {{ vm.source }}
+  <br/>vm.selected: {{ vm.selected }}
+</div>
+</body>
 </html>

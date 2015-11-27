@@ -1,0 +1,79 @@
+/**
+ * auto-complete
+ */
+.auto-complete-multi-wrapper {
+  padding: 5px;
+  border: 1px solid #ccc;
+}
+
+.auto-complete-multi-wrapper > span {
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 0 0 0 5px;
+  padding: 5px;
+}
+
+.auto-complete-multi-wrapper .auto-complete-div {
+  display: inline-block;
+  position: relative;
+}
+
+auto-complete-single,
+*[auto-complete-single] {
+  display: inline-block;
+  position: relative;
+}
+
+auto-complete-single .auto-complete-div,
+*[auto-complete-single] .auto-complete-div {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.auto-complete-div input {
+  outline: none;
+  width: 100%;
+  height: 100%;
+  border: 2px solid transparent;
+  border-width: 3px 2px;
+  margin: 0;
+  box-sizing: border-box;
+  background-clip: content-box;
+}
+
+.auto-complete-div ul {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  margin-top: 2px;
+  display : none;
+  width : 100%;
+  overflow-y: auto;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.auto-complete-div ul li {
+  padding: 2px 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.auto-complete-div ul li.selected {
+  background-color: #ccc;
+}
+
+.auto-complete-div ul li:last-child {
+  border-bottom: none;
+}
+
+.auto-complete-div ul li:hover {
+  background-color: #ccc;
+}

@@ -1,106 +1,39 @@
+/* global document */
 (function(){
   'use strict';
-  var $q, $http;
+  var $q, $http, $timeout;
 
-  var defaultStyle = 
-    'div[auto-complete] select ~ div.select-placeholder {'+
-    '  position: absolute; '+
-    '  padding-left: 12px;'+
-    '  top: 0;'+
-    '  left: 0;'+
-    '  pointer-events: none;'+
-    '}' + 
+  var addLoading = function(ulEl) {
+    ulEl.innerHTML = '<li class="loading"> Loading </li>';
+  };
 
-    'auto-complete-div.default-style input {'+
-    '  outline: none; '+
-    '  border: 2px solid transparent;'+
-    '  border-width: 3px 2px;'+
-    '  margin: 0;'+
-    '  box-sizing: border-box;'+
-    '  background-clip: content-box;'+
-    '}' + 
+  var removeLoading = function(ulEl) {
+    ulEl.querySelector('li.loading') &&
+      ulEl.querySelector('li.loading').remove();
+  };
 
-    'select ~ auto-complete-div.default-style input {'+
-    '  border-width: 3px 3px;'+
-    '}' + 
+  var delay = (function(){
+    var timer = 0;
+    return function(callback, ms){
+      $timeout.cancel(timer);
+      timer = $timeout(callback, ms);
+    };
+  })();
 
-    'auto-complete-div.default-style ul {'+
-    '  background-color: #fff;'+
-    '  margin-top: 2px;'+
-    '  display : none;'+
-    '  width : 100%;'+
-    '  overflow-y: auto;'+
-    '  list-style-type: none;'+
-    '  margin: 0;'+
-    '  padding: 0;'+
-    '  border: 1px solid #ccc;'+
-    '  box-sizing: border-box;'+
-    '}' + 
+  var defaultListFormatter = function(obj, displayKey, valueKey) { /*jshint ignore:line*/
+    if (typeof obj == "object") {
+      return obj[displayKey];
+    } else {
+      return obj;
+    }
+  };
 
-    'auto-complete-div.default-style ul li {'+
-    '  padding: 2px 5px;'+
-    '  border-bottom: 1px solid #eee;'+
-    '}' + 
-
-    'auto-complete-div.default-style ul li.selected {'+
-    '  background-color: #ccc;'+
-    '}' + 
-
-    'auto-complete-div.default-style ul li:last-child {'+
-    '  border-bottom: none;'+
-    '}' + 
-
-    'auto-complete-div.default-style ul li:hover {'+
-    '  background-color: #ccc;'+
-    '}' + 
-
-    'div .auto-complete-repeat {'+
-    '  display: inline-block;'+
-    '  padding: 3px; '+
-    '  background : #fff;'+
-    '  margin: 3px;' +
-    '  border: 1px solid #ccc;' +
-    '  border-radius: 5px;' +
-    '}' +
-
-    'div .auto-complete-repeat .delete {'+
-    '  margin: 0 3px;' +
-    '  color: red;' +
-    '  border: none;' +
-    '  background-color: transparent; ' +
-    '}' +
-
-    'div .auto-complete-repeat .delete[disabled] {'+
-    '  display: none;' +
-    '}' +
-
-    '.auto-complete-div-multi-wrapper {'+
-    '  background-color: #ddd;'+
-    '  min-height: 2em;'+
-    '}'+
-
-    '.auto-complete-div-multi-wrapper auto-complete-div.default-style {'+
-    '  position: relative;'+
-    '  display: inline-block;'+
-    '  margin: 3px;'+
-    '  padding: 3px;'+
-    '}'+
-
-    '.auto-complete-div-multi-wrapper auto-complete-div.default-style input {'+
-    '  background: transparent;'+
-    '  border-radius: 0;'+
-    '  border: none;'+
-    '}'+
-
-    '.auto-complete-div-multi-wrapper auto-complete-div.default-style ul {'+
-    '  position: absolute;'+
-    '  top: 1.5em;'+
-    '  left: 0;'+
-    '  width: auto;'+
-    '  min-width: 10em;'+
-    '}'+
-
-    '';
+  // accepted attributes
+  var autoCompleteAttrs = [
+    'placeholder', 'listFormatter', 'prefillFunc',
+    'ngModel', 'valueChanged', 'source', 'pathToData', 'minChars',
+    'valueProperty', 'displayProperty', 'ngDisabled'
+  ];
 
   // return dasherized from  underscored/camelcased string
   var dasherize = function(string) {
@@ -115,18 +48,6 @@
     return document.defaultView.
       getComputedStyle(el,null).
       getPropertyValue(styleProp);
-  };
-
-  var injectDefaultStyleToHead = function() {
-    if (!document.querySelector('style#auto-complete-style')) {
-      var htmlDiv = document.createElement('div');
-      htmlDiv.innerHTML = '<b>1</b>'+ 
-        '<style id="auto-complete-style">' +
-        defaultStyle +
-        '</style>';
-      document.getElementsByTagName('head')[0].
-        appendChild(htmlDiv.childNodes[1]);
-    }
   };
 
   var getRemoteData = function(source, query, pathToData) {
@@ -175,15 +96,43 @@
     return deferred.promise;
   };
 
+  // return auto-complete-single-div or auto-complete-multi-div tag
+  // with input and ul tags inside
+  var getAutocompleteDiv = function(attrs, tagName) {
+    var autocompleteDiv = document.createElement(tagName);
+    autocompleteDiv.className = 'auto-complete-div';
+
+    var inputEl = document.createElement('input');
+    inputEl.setAttribute('placeholder', attrs.placeholder);
+    attrs.ngDisabled &&
+      inputEl.setAttribute('ng-disabled', attrs.ngDisabled);
+    autocompleteDiv.appendChild(inputEl);
+
+    var ulEl = document.createElement('ul');
+    autocompleteDiv.appendChild(ulEl);
+
+    autoCompleteAttrs.map(function(attr) {
+      if (attrs[attr]) {
+        autocompleteDiv.setAttribute(dasherize(attr), attrs[attr]);
+      }
+    });
+    return autocompleteDiv;
+  };
+
   angular.module('angularjs-autocomplete').
-    factory('AutoComplete', ['$q', '$http', function(_$q_, _$http_) {
-      $q = _$q_, $http = _$http_;
+    factory('AutoComplete', ['$q', '$http', '$timeout',
+      function(_$q_, _$http_, _$timeout_) {
+      $q = _$q_, $http = _$http_, $timeout = _$timeout_;
       return {
-        defaultStyle: defaultStyle,
+        addLoading: addLoading,
+        removeLoading: removeLoading,
+        autoCompleteAttrs: autoCompleteAttrs,
+        delay: delay,
+        defaultListFormatter: defaultListFormatter,
         dasherize: dasherize,
         getStyle: getStyle,
         getRemoteData: getRemoteData,
-        injectDefaultStyle: injectDefaultStyleToHead
+        getAutocompleteDiv: getAutocompleteDiv
       };
     }]);
 })();

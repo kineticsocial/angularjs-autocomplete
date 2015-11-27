@@ -1,95 +1,58 @@
+/* global document */
+/**
+ * This prepares DOM elements for autocomplete
+ */
 (function(){
   'use strict';
-  var $compile;
+  var $compile, AutoComplete;
 
-  // return dasherized from  underscored/camelcased string
-  var dasherize = function(string) {
-    return string.replace(/_/g, '-').
-      replace(/([a-z])([A-Z])/g, function(_,$1, $2) {
-        return $1+'-'+$2.toLowerCase();
-      });
-  };
-
-  // accepted attributes
-  var autoCompleteAttrs = [
-    'placeholder', 'multiple', 'listFormatter', 'prefillFunc',
-    'ngModel', 'valueChanged', 'source', 'pathToData', 'minChars',
-    'defaultStyle', 'valueProperty', 'displayProperty'
-  ];
-
-  // build autocomplet-div tag with input and select
-  var buildACDiv = function(attrs) {
-    var acDiv = document.createElement('auto-complete-div');
-
-    var inputEl = document.createElement('input');
-    attrs.placeholder = attrs.placeholder || 'Select';
-    inputEl.setAttribute('placeholder', attrs.placeholder);
-    inputEl.setAttribute('size', attrs.placeholder.length);
-
-    attrs.ngDisabled &&
-      inputEl.setAttribute('ng-disabled', attrs.ngDisabled);
-    acDiv.appendChild(inputEl);
-
-    var ulEl = document.createElement('ul');
-    acDiv.appendChild(ulEl);
-
-    autoCompleteAttrs.map(function(acAttr) {
-      if (attrs[acAttr]) {
-        var attrValue = attrs[acAttr];
-        acDiv.setAttribute(dasherize(acAttr), attrValue);
-      }
-    });
-    acDiv.style.position = 'relative';
-    //acDiv.style.display = 'none';
-    return acDiv;
-  };
-
-  var buildMultiACDiv = function(attrs) {
-    var deleteLink = document.createElement('button');
-    deleteLink.innerHTML = 'x';
-    deleteLink.className += ' delete';
-    deleteLink.setAttribute('ng-click', attrs.ngModel+'.splice($index, 1); $event.stopPropagation()');
-
-    var ngRepeatDiv = document.createElement('span');
-    ngRepeatDiv.className += ' auto-complete-repeat';
-    ngRepeatDiv.setAttribute('ng-repeat', 'obj in '+attrs.ngModel+' track by $index');
-    if (attrs.listFormatter) {
-      ngRepeatDiv.innerHTML = '<span ng-bind-html="listFormatter(obj)"></span>';
-    } else {
-      ngRepeatDiv.innerHTML = '<b>({{obj.'+attrs.valueProperty+'}})</b>'+
-        '<span>{{obj.'+attrs.displayProperty+'}}</span>';
-    }
-    ngRepeatDiv.appendChild(deleteLink);
+  var getAutocompleteMultiWrapper = function(options) {
+    var template = [
+      '<span ng-repeat="obj in NGMODEL track by $index">',
+      '  <span>{{vm.listFormatter(obj)}}</span>',
+      '  <a href=""',
+      '    ng-click="NGMODEL.splice($index,1);$event.stopPropagation()">x</a>',
+      '</span>'
+    ].join("\n").replace(/NGMODEL/g, options.ngModel);
 
     var multiACDiv = document.createElement('div');
-    multiACDiv.className = 'auto-complete-div-multi-wrapper';
-    multiACDiv.appendChild(ngRepeatDiv);
+    multiACDiv.className = 'auto-complete-multi-wrapper';
+    multiACDiv.innerHTML= template;
 
     return multiACDiv;
   };
 
-  var compileFunc = function(element, attrs)  {
-    element[0].style.position = 'relative';
+  var controller = function($scope, $element, $attrs, $parse) {
+    $attrs.valueProperty = $attrs.valueProperty || 'id';
+    $attrs.displayProperty = $attrs.displayProperty || 'value';
 
-    var controlEl = element[0].querySelector('select');
-    controlEl.style.display = 'none';
+    // build <div auto-complete-multi-wrapper>
+    var wrapperDiv = getAutocompleteMultiWrapper($attrs);
+    // build <auto-complete-multi-div>
+    var autocompleteMultiDiv =
+      AutoComplete.getAutocompleteDiv($attrs, 'auto-complete-multi-div');
+    wrapperDiv.appendChild(autocompleteMultiDiv);
+    $element[0].appendChild(wrapperDiv);
+    $compile($element.contents())($scope);
 
-    attrs.valueProperty = attrs.valueProperty || 'id';
-    attrs.displayProperty = attrs.displayProperty || 'value';
-    attrs.ngModel = controlEl.getAttribute('ng-model');
-    attrs.multiple = true;
-
-    // 1. build <auto-complete-div>
-    var multiACDiv = buildMultiACDiv(attrs);
-    var acDiv = buildACDiv(attrs);
-    multiACDiv.appendChild(acDiv);
-    element[0].appendChild(multiACDiv);
-
-  }; // compileFunc
+    if ($attrs.listFormatter) {
+      this.listFormatter = $parse($attrs.listFormatter);
+    } else {
+      this.listFormatter = function(obj) {
+        return obj[$attrs.displayProperty || 'value'];
+      };
+    }
+  };
+  controller.$inject = ['$scope', '$element', '$attrs', '$parse'];
 
   angular.module('angularjs-autocomplete').
-    directive('autoCompleteMulti', ['$compile', function(_$compile_) {
-      $compile = _$compile_;
-      return { compile: compileFunc };
-    }]);
+    directive('autoCompleteMulti', [
+      '$compile', 'AutoComplete',
+      function(_$compile_, _AutoComplete_) {
+        $compile = _$compile_, AutoComplete = _AutoComplete_;
+        return {
+          controller: controller
+        };
+      }
+    ]);
 })();

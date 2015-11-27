@@ -5,7 +5,7 @@
 <script src="lib/angular.js"></script>
 <script src="../app.js"></script>
 <script src="../services/auto-complete.js"></script>
-<script src="../directives/auto-complete-single.js"></script>
+<script src="../directives/auto-complete.js"></script>
 <script src="../directives/auto-complete-single-div.js"></script>
 <link rel="stylesheet" type="text/css" href="../css/angularjs-autocomplete.css" />
 <script>
@@ -23,9 +23,7 @@ angular.module('myApp', ['angularjs-autocomplete'])
     vm.selected = arg;
   };
   vm.prefillFunc = function() {
-    $http.get('prefill.json').success(function(resp) {
-      vm.myVar = resp.data;
-    });
+    vm.myVar = 'Prefilled';
   };
   vm.listFormatter = function(data) {
     return data.id ? '<b>('+data.id+')</b><i>'+data.value+'</i>' : data;
@@ -50,32 +48,31 @@ Choose Source:
 <br/><br/>
 <div ng-show="vm.source">
 
-  <div auto-complete-single
+  <input auto-complete
+    value-changed="vm.callback(value)"
+    ng-model="vm.myVar"
+    ng-disabled="disabled"
+    placeholder="Enter Text"
     ng-show="vm.source == vm.source1 || vm.source == vm.source2"
+    class="my-input"
     source="vm.source"
     display-property="value"
     value-property="id"
     prefill-func="vm.prefillFunc()"
-    list-formatter="vm.listFormatter"
-    value-changed="vm.callback(value)">
-    <input class="my-input"
-      ng-model="vm.myVar"
-      ng-disabled="disabled"
-      placeholder="Enter Text" />
-  </div>
+    list-formatter="vm.listFormatter" />
 
-  <div auto-complete-single
+  <input class="my-input"
+    placeholder="Enter Address"
+    ng-model="vm.myVar"
+    ng-disabled="disabled"
+    auto-complete
     ng-show="vm.source == vm.source3 || vm.source == vm.source4"
     source="vm.source"
     path-to-data="results"
     display-property="formatted_address"
     min-chars="2"
-    value-changed="vm.callback(value)">
-    <input class="my-input"
-      ng-model="vm.myVar"
-      ng-disabled="disabled"
-      placeholder="Enter Address" />
-  </div>
+    value-changed="vm.callback(value)" />
+
   <input type="checkbox" ng-model="disabled"> Disabled
 
   <br/>
@@ -84,20 +81,6 @@ Choose Source:
   <br/>selected: {{vm.selected}}
   <br/>
   <br/> HTML:
-  <pre>
-  &lt;div auto-complete-single
-    source="vm.source"
-    display-property="value"
-    value-property="id"
-    prefill-func="vm.prefillFunc()"
-    list-formatter="vm.listFormatter"
-    value-changed="vm.callback(value)">
-    &lt;input class="my-input"
-      ng-model="vm.myVar"
-      ng-disabled="disabled"
-      placeholder="Enter Text" />
-  &lt;/div>
-  </pre>
 </div>
 
 </body>

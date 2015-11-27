@@ -13,11 +13,7 @@ gulp.task('clean', function() {
 });
 
 gulp.task('build-js', function() {
-  return gulp.src([
-    'directives/auto-complete.js',
-    'directives/auto-complete-multi.js',
-    'directives/auto-complete-div.js',
-    'services/*.js'])
+  return gulp.src(['app.js', '*/auto-complete*.js'])
     .pipe(concat('angularjs-autocomplete.debug.js'))
     .pipe(gulp.dest('build'))
     .pipe(stripDebug())
