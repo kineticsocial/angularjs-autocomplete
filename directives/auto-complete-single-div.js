@@ -7,24 +7,10 @@
     var vm = this;
 
     vm.containerEl = $element[0];
-    vm.inputEl     = $element[0].querySelector('input');
     vm.ulEl        = $element[0].querySelector('ul');
-    vm.parentEl    = $element[0].parentElement;
-    vm.controlEl   = vm.parentEl.querySelector('input');
+    vm.inputEl     = $element[0].parentElement.querySelector('input');
 
-    //block users to modify <input ng-model> directly
-    vm.controlEl.readOnly = true;
-    //run prefill function
-    $scope.prefillFunc && $scope.prefillFunc();
-
-
-    // focus on <input> tag, then empty contents
-    vm.focusInputEl = function() {
-      vm.ulEl.style.display = 'block';
-      vm.inputEl.focus();
-      vm.inputEl.value = '';
-      vm.loadList();
-    };
+    $scope.prefillFunc && $scope.prefillFunc(); //run prefill function
 
     // build an <li> tag by data
     vm.getLiEl = function(data, displayProperty, valueProperty) {
@@ -66,7 +52,7 @@
         if (Array.isArray($scope.source)) { // local source
           var filteredData = filterFilter($scope.source, vm.inputEl.value);
           vm.ulEl.style.display = 'block';
-          vm.addListElements(filteredData);
+          vm.addListElements(angular.copy(filteredData));
         } else {
           AutoComplete.getRemoteData(
             $scope.source,                 //source
@@ -83,46 +69,20 @@
       AutoComplete.removeLoading(vm.ulEl);
     };
 
-    //When user clicked on <input ng-model>
-    //show <auto-complete-single-div>
-    //with <input> covering <input ng-model>
-    vm.controlEl.addEventListener('click', function() {
-      if (!vm.controlEl.disabled) {
-        vm.containerEl.style.display = 'block';
-        vm.inputEl.focus();
-      }
-    });
-
-    // when mouseclicked on <ul> tag, select the given <li> tag
-    vm.ulEl.addEventListener('mousedown', function(evt) {
-      if (evt.target !== vm.ulEl) {
-        var liTag = evt.target;
-        while(liTag.tagName !== 'LI') {
-          liTag = liTag.parentElement;
-        }
-
-        // Select only if it is a <li></li> and the class is not 'loading'
-        if(liTag.tagName == 'LI' && liTag.className != "loading"){
-          vm.select(liTag);
-        }
-      }
-    });
-
     //text entered to <input>, reload the list
     vm.inputEl.addEventListener('input', function() {
+      vm.containerEl.style.display = 'block';
       AutoComplete.delay(function() { //executing after user stopped typing
         vm.loadList();
       }, Array.isArray($scope.source) ? 10 : 500);
     });
 
-    //when focused on input element
-    //focus on <input> tag, not <input ng-model>
-    vm.inputEl.addEventListener('focus', function() {
-      !vm.controlEl.disabled && vm.focusInputEl();
+    //when click on input, show autocomplete block
+    //when blur on input, hide autocomplete block
+    vm.inputEl.addEventListener('click', function() {
+      vm.containerEl.style.display = 'block';
     });
 
-    //when blurred on input element
-    //hide all <auto-complete-single-div>, so that user can see as it was
     vm.inputEl.addEventListener('blur', function() {
       vm.containerEl.style.display = 'none';
     });
@@ -158,10 +118,25 @@
       }
     });
 
+    // when mouseclicked on <ul> tag, select the given <li> tag
+    vm.ulEl.addEventListener('mousedown', function(evt) {
+      if (evt.target !== vm.ulEl) {
+        var liTag = evt.target;
+        while(liTag.tagName !== 'LI') {
+          liTag = liTag.parentElement;
+        }
+
+        // Select only if it is a <li></li> and the class is not 'loading'
+        if(liTag.tagName == 'LI' && liTag.className != "loading"){
+          vm.select(liTag);
+        }
+      }
+    });
+
     vm.select = function(liEl) {
       liEl.className = '';
-      vm.containerEl.style.display = 'none';
       $timeout(function() {
+        vm.containerEl.style.display = 'none';
         console.log('liEl.modelValue', liEl.modelValue);
         var modelValue = liEl.modelValue;
         if (typeof modelValue == "object") {
@@ -169,7 +144,6 @@
             return this[$scope.displayProperty]; //Yay!!!
           };
         }
-        vm.inputEl.value = '';
         $scope.ngModel = modelValue;
         $scope.valueChanged({value: liEl.model}); //user scope
       });

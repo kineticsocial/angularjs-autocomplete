@@ -182,7 +182,7 @@
         controller: controller,
         scope: {
           ngModel: '=',         // output of autocomplete
-          source: '=',          // input of autocomplte
+          source: '=',          // input of autocomplete
           minChars: '=',        // starts with min. number of characters
           listFormatter: '=',   // dropdown <li> contents
           ngDisabled: '=',      // stop indicator

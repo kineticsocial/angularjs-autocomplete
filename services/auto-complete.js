@@ -98,15 +98,17 @@
 
   // return auto-complete-single-div or auto-complete-multi-div tag
   // with input and ul tags inside
-  var getAutocompleteDiv = function(attrs, tagName) {
+  var getAutocompleteDiv = function(attrs, tagName, noInput) {
     var autocompleteDiv = document.createElement(tagName);
     autocompleteDiv.className = 'auto-complete-div';
 
-    var inputEl = document.createElement('input');
-    inputEl.setAttribute('placeholder', attrs.placeholder);
-    attrs.ngDisabled &&
-      inputEl.setAttribute('ng-disabled', attrs.ngDisabled);
-    autocompleteDiv.appendChild(inputEl);
+    if (!noInput) {
+      var inputEl = document.createElement('input');
+      inputEl.setAttribute('placeholder', attrs.placeholder);
+      attrs.ngDisabled &&
+        inputEl.setAttribute('ng-disabled', attrs.ngDisabled);
+      autocompleteDiv.appendChild(inputEl);
+    }
 
     var ulEl = document.createElement('ul');
     autocompleteDiv.appendChild(ulEl);
