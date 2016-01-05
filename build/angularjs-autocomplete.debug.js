@@ -493,7 +493,7 @@ angular.module('angularjs-autocomplete',[]);
   // </div>
   var controller = function($scope, $element, $attrs)  {
     var wrapperDiv = document.createElement('div');
-    wrapperDiv.className="auto-complete-single";
+    wrapperDiv.className="auto-complete-single " + $attrs.class;
 
     $attrs.valueProperty = $attrs.valueProperty || 'id';
     $attrs.displayProperty = $attrs.displayProperty || 'value';
