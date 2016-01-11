@@ -412,7 +412,7 @@
           }
         }
         inputEl.value = '';
-        scope.valueChanged({value: liEl.model, action: 'select'}); //user scope
+        scope.valueChanged({value: liEl.model, action: 'selected'}); //user scope
       });
     };
 
@@ -480,8 +480,8 @@
           displayProperty: '@',
           placeholder: '@',
           prefillFunc: '&',
+          valueChanged: '&',
           interacted: '&', // callback when there's an interaction with the list, but no changes to the values selected in autocomplete
-          touched: '&',
           submitOnEnter: '='
         },
         link: linkFunc

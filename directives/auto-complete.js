@@ -12,7 +12,7 @@
   // accepted attributes
   var autoCompleteAttrs = [
     'placeholder', 'listFormatter', 'prefillFunc',
-    'ngModel', 'valueChanged', 'source', 'pathToData', 'minChars',
+    'ngModel', 'valueChanged', 'interacted', 'source', 'pathToData', 'minChars',
     'defaultStyle', 'valueProperty', 'displayProperty'
   ];
 
