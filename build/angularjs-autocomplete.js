@@ -12,7 +12,7 @@
   // accepted attributes
   var autoCompleteAttrs = [
     'placeholder', 'listFormatter', 'prefillFunc',
-    'ngModel', 'valueChanged', 'source', 'pathToData', 'minChars',
+    'ngModel', 'valueChanged', 'interacted', 'source', 'pathToData', 'minChars',
     'defaultStyle', 'valueProperty', 'displayProperty'
   ];
 
@@ -81,7 +81,7 @@
   // accepted attributes
   var autoCompleteAttrs = [
     'placeholder', 'multiple', 'listFormatter', 'prefillFunc',
-    'ngModel', 'valueChanged', 'source', 'pathToData', 'minChars',
+    'ngModel', 'valueChanged', 'interacted', 'source', 'pathToData', 'minChars',
     'defaultStyle', 'valueProperty', 'displayProperty'
   ];
 
@@ -259,16 +259,19 @@
     var selected = scope.ulEl.querySelector('.selected');
     switch(evt.keyCode) {
       case 27: // ESC
+        scope.interacted({key: evt.keyCode, action: 'esc'});
         selected.className = '';
         hideAutoselect(scope);
         break;
       case 38: // UP
+        scope.interacted({key: evt.keyCode, action: 'up'});
         if (selected.previousSibling) {
           selected.className = '';
           selected.previousSibling.className = 'selected';
         }
         break;
       case 40: // DOWN
+        scope.interacted({key: evt.keyCode, action: 'down'});
         scope.ulEl.style.display = 'block';
         if (selected && selected.nextSibling) {
           selected.className = '';
@@ -287,9 +290,15 @@
         // remove the last element for multiple and empty input
         if (scope.multiple && scope.inputEl.value === '') {
           $timeout(function() {
-            scope.ngModel.pop();
+            var value = scope.ngModel.pop();
+            scope.valueChanged({value: value, action: 'removed'});
           });
+        } else {
+          scope.interacted({key: evt.keyCode, action: 'backspace'});
         }
+        break;
+      default:
+        scope.interacted({key: evt.keyCode, action: 'other_key'});
     }
   };
 
@@ -330,11 +339,13 @@
         }
 
         controlEl.addEventListener('mouseover', function() {
+          scope.interacted({key: null, action: 'mouseover'});
           for (var i=0; i<controlEl.children.length; i++) {
             controlEl.children[i].style.display = 'none';
           }
         });
         controlEl.addEventListener('mouseout', function() {
+          scope.interacted({key: null, action: 'mouseout'});
           for (var i=0; i<controlEl.children.length; i++) {
             controlEl.children[i].style.display = '';
           }
@@ -401,7 +412,7 @@
           }
         }
         inputEl.value = '';
-        scope.valueChanged({value: liEl.model}); //user scope
+        scope.valueChanged({value: liEl.model, action: 'select'}); //user scope
       });
     };
 
@@ -469,7 +480,8 @@
           displayProperty: '@',
           placeholder: '@',
           prefillFunc: '&',
-          valueChanged: '&',
+          interacted: '&', // callback when there's an interaction with the list, but no changes to the values selected in autocomplete
+          touched: '&',
           submitOnEnter: '='
         },
         link: linkFunc
