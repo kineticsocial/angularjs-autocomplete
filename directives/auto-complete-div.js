@@ -95,19 +95,19 @@
     var selected = scope.ulEl.querySelector('.selected');
     switch(evt.keyCode) {
       case 27: // ESC
-        scope.interacted({key: evt.keyCode, action: 'esc'});
+        scope.interacted();
         selected.className = '';
         hideAutoselect(scope);
         break;
       case 38: // UP
-        scope.interacted({key: evt.keyCode, action: 'up'});
+        scope.interacted();
         if (selected.previousSibling) {
           selected.className = '';
           selected.previousSibling.className = 'selected';
         }
         break;
       case 40: // DOWN
-        scope.interacted({key: evt.keyCode, action: 'down'});
+        scope.interacted();
         scope.ulEl.style.display = 'block';
         if (selected && selected.nextSibling) {
           selected.className = '';
@@ -127,14 +127,14 @@
         if (scope.multiple && scope.inputEl.value === '') {
           $timeout(function() {
             var value = scope.ngModel.pop();
-            scope.valueChanged({value: value, action: 'removed'});
+            scope.valueChanged({value: value});
           });
         } else {
-          scope.interacted({key: evt.keyCode, action: 'backspace'});
+          scope.interacted();
         }
         break;
       default:
-        scope.interacted({key: evt.keyCode, action: 'other_key'});
+        scope.interacted();
     }
   };
 
@@ -175,13 +175,13 @@
         }
 
         controlEl.addEventListener('mouseover', function() {
-          scope.interacted({key: null, action: 'mouseover'});
+          scope.interacted();
           for (var i=0; i<controlEl.children.length; i++) {
             controlEl.children[i].style.display = 'none';
           }
         });
         controlEl.addEventListener('mouseout', function() {
-          scope.interacted({key: null, action: 'mouseout'});
+          scope.interacted();
           for (var i=0; i<controlEl.children.length; i++) {
             controlEl.children[i].style.display = '';
           }
@@ -248,7 +248,7 @@
           }
         }
         inputEl.value = '';
-        scope.valueChanged({value: liEl.model, action: 'selected'}); //user scope
+        scope.valueChanged({value: liEl.model}); //user scope
       });
     };
 
