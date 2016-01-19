@@ -118,7 +118,7 @@
         break;
       case 13: // ENTER
         selected && scope.select(selected);
-        if (!scope.submitOnEnter) {
+        if (!scope.submitOnEnter || selected) {
           evt.preventDefault();
         }
         break;
