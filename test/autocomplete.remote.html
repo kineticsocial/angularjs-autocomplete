@@ -32,7 +32,7 @@
   };
   </script>
   <style>
-    div[auto-complete] input {width: 300px; height: 30px}
+    div[ks-auto-complete] input {width: 300px; height: 30px}
   </style>
 </head>
 
@@ -54,7 +54,7 @@
 
   </ul>
 
-  <div auto-complete
+  <div ks-auto-complete
     source="source"
     path-to-data="results"
     display-property="formatted_address"
@@ -63,7 +63,7 @@
     value-changed="callback(value)">
     <input id='ip' ng-model="addressText" name="addressText" />
   </div>
-  <script>printHTML("div[auto-complete]")</script>
+  <script>printHTML("div[ks-auto-complete]")</script>
 
   <br/>
   <br/>$scope.addressText: <b>{{addressText}}</b>

@@ -59,7 +59,7 @@
 
   angular.module('angularjs-autocomplete',['ngSanitize']);
   angular.module('angularjs-autocomplete').
-    directive('autoComplete', function() {
+    directive('ksAutoComplete', function() {
       return {
         compile: compileFunc,
       };

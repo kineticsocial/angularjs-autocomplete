@@ -3,7 +3,7 @@
   var $q, $http;
 
   var defaultStyle = 
-    'div[auto-complete] select ~ div.select-placeholder {'+
+    'div[ks-auto-complete] select ~ div.select-placeholder {'+
     '  position: absolute; '+
     '  padding-left: 12px;'+
     '  top: 0;'+

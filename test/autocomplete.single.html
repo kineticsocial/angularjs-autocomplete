@@ -42,8 +42,8 @@
       };
     </script>
     <style>
-      div[auto-complete] > input  {width: 300px; height: 30px; border-color: #ccc}
-      div[auto-complete] > select {width: 300px; height: 30px; -webkit-appearance: menulist-button;}
+      div[ks-auto-complete] > input  {width: 300px; height: 30px; border-color: #ccc}
+      div[ks-auto-complete] > select {width: 300px; height: 30px; -webkit-appearance: menulist-button;}
     </style>
   </head>
 
@@ -63,12 +63,12 @@
 
     <button ng-click="show1=!show1">Show/hide</button>
     <div ng-if="show1">
-      <div auto-complete id="ih" source="source" value-changed="callback(value)">
+      <div ks-auto-complete id="ih" source="source" value-changed="callback(value)">
         <input ng-model="foo" ng-disabled="disabled" placeholder="Select" />
       </div>
       <input type="checkbox" ng-model="disabled"> Disable 
       <button ng-click="foo=''">Clear</button> 
-      <script>printHTML('div[auto-complete]#ih');</script>
+      <script>printHTML('div[ks-auto-complete]#ih');</script>
       <br/>$scope.foo:  <b>{{ foo }}</b>
     </div>
 
@@ -76,7 +76,7 @@
     <br/>
     <button ng-click="show2=!show2">Show/hide SELECT</button>
     <div ng-if="show2">
-      <div auto-complete id="sh" source="source" 
+      <div ks-auto-complete id="sh" source="source" 
         value-changed="callback(value)" 
         list-formatter="listFormatter"
         prefill-func="prefillFunc('prefill.json?id='+bar)", 
@@ -86,7 +86,7 @@
       </div>
       <input type="checkbox" ng-model="disabled"> Disable 
       <button ng-click="bar=''">Clear</button> 
-      <script>printHTML('div[auto-complete]#sh');</script>
+      <script>printHTML('div[ks-auto-complete]#sh');</script>
       <br/>$scope.bar:  <b>{{ bar }}</b>
 
       <br/>$scope.source: {{ source }}
